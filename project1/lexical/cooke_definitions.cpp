@@ -37,5 +37,6 @@
 #define INT_LIT 34
 #define IDENT 35
 
+int lex();
 
 #endif

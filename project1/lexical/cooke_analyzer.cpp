@@ -3,8 +3,7 @@
 #include <ctype.h>
 
 #include "cooke_definitions.cpp"
-#include "cooke_parser.cpp"
-
+#include "cooke_parser_definitions.cpp"
 
 using namespace std;
 
@@ -167,7 +166,7 @@ string valueOf(int token) {
         break;
 
     default:
-        return "";
+        return "UNKNOWN";
         break;
     }
 }
@@ -184,6 +183,7 @@ static int lookup(char ch) {
             }
             else {
                 nextToken = ASSIGN_OP;
+                return nextToken;
             }
             break;
         case '!':
@@ -246,6 +246,10 @@ static int lookup(char ch) {
             addChar();
             nextToken = DIV_OP;
             break;
+        case '%':
+            addChar();
+            nextToken = MOD_OP;
+            break;
         case ';':
             addChar();
             nextToken = SEMICOLON;
@@ -267,6 +271,7 @@ static int lookup(char ch) {
             }
             else {
                 nextToken = EOF;
+                return nextToken;
             }
             break;
         case '|':
@@ -278,11 +283,12 @@ static int lookup(char ch) {
             }
             else {
                 nextToken = EOF;
+                return nextToken;
             }
             break;
         default:
             addChar();
-            nextToken = EOF;
+            nextToken = UNKNOWN;
             break;
     }
     getChar();
@@ -359,13 +365,19 @@ int lex() {
 
 int main(int argc, char* argv[]) {
 
+    // in_fp = fopen(argv[1], "r");
     in_fp = fopen("test.dc", "r");
+
+    for(int i = 0; i < argc; i++) {
+        cout << argv[i];
+    }
+    cout << endl;
 
     if (in_fp == NULL) {
         cout << "ERROR - cannot open file \n" << endl;
     }
     else {
-        cout << "Cooke Analyzer :: R11837228\n\n" << endl;
+        cout << "Cooke Analyzer :: R11837228\n" << endl;
         getChar();
         do {
             lex();
