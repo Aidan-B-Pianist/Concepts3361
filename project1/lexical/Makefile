@@ -1,14 +1,13 @@
+CFLAGS=-Wall
+CC=g++
+SRC=cooke_analyzer.cpp cooke_definitions.cpp
+OBJ=${SRC:.cpp=.o}
+
 all: cooke_analyzer
 
-cooke_analyzer: cooke_analyzer.o
-	g++ -Wall cooke_analyzer
-
-.c.o:
-	g++ -Wall -c $<
-
-
-test: cooke_analyzer cooke_analyzer.cpp
-	./cooke_analyzer
+cooke_analyzer: ${OBJ}
+        ${CC} ${CFLAGS} -o $@ ${OBJ}
 
 clean:
-	$(RM) cooke_analyzer.o
+        rm -f ${OBJ} cooke_analyzer
+
