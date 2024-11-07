@@ -18,6 +18,7 @@ static int lexLen;
 static FILE *in_fp;
 string tokenString;
 int lineNumber = 1;
+int errorCount = 0;
 
 static void addChar();
 static void getChar();
@@ -87,11 +88,24 @@ void factor()
     /* Determine which RHS */
     if (nextToken == IDENT || nextToken == INT_LIT) {
         lex(); /* Get the next token */
-    } else {
+    } 
+    else {
         /* If the RHS is (<expr>), call lex to pass over the 
         left parenthesis, call expr, and check for the right 
         parenthesis */
-        if (nextToken == OPEN_PAREN) {
+        if (nextToken == KEY_IF){
+            lex();
+
+                if (nextToken == OPEN_PAREN){
+                lex(); 
+                expr();
+
+                if (nextToken == CLOSE_PAREN) {
+                    lex(); 
+                }
+            }
+        }
+        if (nextToken == OPEN_PAREN){
             lex(); 
             expr();
 
@@ -100,11 +114,29 @@ void factor()
             } else { 
                 error();
             }
-        } /* End of if (nextToken == ... */
+        }
+        if (nextToken == OPEN_CURL){
+            lex(); 
+            expr();
+
+            if (nextToken == CLOSE_CURL) {
+                lex(); 
+            } else { 
+                error();
+            }
+        }
+        else if(nextToken == EOF)
+        { 
+            if(errorCount == 0) {
+                cout << "Syntax Validated" << endl;
+            } 
+        }
+         /* End of if (nextToken == ... */
         /* It was not an id, an integer literal, or a left parenthesis */
         else 
         { 
-            error(); 
+            errorCount++;
+            error();
         }
     } /* End of else */
     //cout << "Exit <factor>" << endl;
@@ -113,6 +145,7 @@ void factor()
 static void error() 
 {
     cout << "Error on line " << lineNumber << ": The next lexeme was " << lexeme << " and the next token was " << tokenString << endl;
+    cout << errorCount << " error(s)" << endl;
 }
 
 static void getChar() {

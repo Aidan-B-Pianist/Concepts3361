@@ -270,7 +270,7 @@ static int lookup(char ch) {
                 nextToken = BOOL_AND;
             }
             else {
-                nextToken = EOF;
+                nextToken = UNKNOWN;
                 return nextToken;
             }
             break;
@@ -282,7 +282,7 @@ static int lookup(char ch) {
                 nextToken = BOOL_OR;
             }
             else {
-                nextToken = EOF;
+                nextToken = UNKNOWN;
                 return nextToken;
             }
             break;
