@@ -1,1 +1,12 @@
-!(a);
+f=15;
+i=11;
+
+input(n);
+
+if (n == i && f > i) {
+	i = i + f;
+} else {
+	i = f - i;
+}
+
+output(i);
