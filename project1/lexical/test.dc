@@ -1,12 +1,13 @@
-f=15;
-i=11;
+f = 15;
+i = 10;
 
 input(n);
 
-if (n == i && f > i) {
+if (n = 5) {
 	i = i + f;
 } else {
-	i = f - i;
+	i = i + f;
 }
 
-output(i);
+
+output(n);

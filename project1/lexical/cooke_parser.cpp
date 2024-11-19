@@ -46,8 +46,8 @@ static void error();
 
 void expr()
 {
-    // cout << "Enter <expr>" << endl;
-
+    cout << lexeme << endl;
+    cout << "Enter <expr>" << endl;
     /* Parse the first term */
     term();
 
@@ -59,7 +59,7 @@ void expr()
         term();
     }
 
-    // cout << "Exit <expr>" << endl;
+    cout << "Exit <expr>" << endl;
 } /* End of function expr */
 
 /* term
@@ -68,17 +68,20 @@ void expr()
  */
 void term()
 {
-    // cout << "Enter <term>" << endl;
+    cout << "Enter <term>" << endl;
     /* Parse the first factor */
     factor();
     /* As long as the next token is * or /, get the
     next token and parse the next factor */
-    while (nextToken == MULT_OP || nextToken == DIV_OP || nextToken == EQUAL_OP || nextToken == BOOL_AND)
+    while (nextToken == MULT_OP || nextToken == DIV_OP || nextToken == EQUAL_OP || nextToken == GREATER_OP || nextToken == BOOL_AND
+    || nextToken == NEQUAL_OP || nextToken == GEQUAL_OP || nextToken == LEQUAL_OP || nextToken == LESSER_OP || nextToken == BOOL_OR
+    || nextToken == MOD_OP)
+    // while(nextToken == MULT_OP || nextToken == DIV_OP)
     {
         lex();
         factor();
     }
-    // cout << "Exit <term>" << endl;
+    cout << "Exit <term>" << endl;
 } /* End of function term */
 
 /* factor
@@ -87,11 +90,92 @@ void term()
  * */
 void factor()
 {
-    // cout << "Enter <factor>" << endl;
+    cout << "Enter <factor>" << endl;
     /* Determine which RHS */
     if (nextToken == IDENT || nextToken == INT_LIT)
-    {
-        lex(); /* Get the next token */
+    {   
+        if(nextToken == IDENT) {
+            lex();
+            if(nextToken == ASSIGN_OP) {
+                lex();
+                //arithmetic case i = i + f;
+                if(nextToken == IDENT) {
+                    expr();
+                    if(nextToken != SEMICOLON) {
+                        error();
+                    }
+                }
+                else if(nextToken == OPEN_PAREN) {
+                    parenCounter++;
+                    lex();
+                    //single parantheses case
+                    if(nextToken == IDENT) {
+                        expr();
+                        lex();
+                        if(nextToken == CLOSE_PAREN) {
+                            parenCounter--;
+                            lex();
+                            if(nextToken != SEMICOLON) {
+                                error();
+                            }
+                        }
+                        else if(nextToken == OPEN_PAREN) {
+                            /*
+                            Finish this later
+                            */
+                        }
+                    }
+                    //multi parantheses opening
+                    else if(nextToken == OPEN_PAREN) {
+                        while(nextToken == OPEN_PAREN) {
+                            parenCounter++;
+                            lex();
+                        }
+                        if(nextToken == IDENT || nextToken == INT_LIT) {
+                                cout << "HERE" << endl;
+                                int temp = parenCounter;
+                                for(int i = 0; i < temp; i++) {
+                                    expr();
+                                    lex();
+                                    if(nextToken == CLOSE_PAREN) {
+                                        parenCounter--;
+                                        lex();
+                                        if(nextToken == ADD_OP || nextToken == SUB_OP || nextToken == MULT_OP
+                                        || nextToken == DIV_OP || nextToken == MOD_OP) {
+                                            lex();
+                                        } else if(nextToken != SEMICOLON) {
+                                            error();
+                                        } 
+                                    }
+                                }
+                                cout << "THE LEXEME IS: " << lexeme << endl;
+                            }
+                    }
+
+
+                    if(parenCounter != 0) {
+                        error();
+                    } 
+                }
+                //statement case V = E;
+                else 
+                {
+                    expr();
+                    lex();
+                    if(nextToken != SEMICOLON) {
+                        error();
+                    }
+                }
+            }
+            //input case 
+            else if(nextToken == CLOSE_PAREN) {
+
+            }
+            //arithmetic case
+            else {
+
+            }
+        }
     }
     else
     {
@@ -105,37 +189,54 @@ void factor()
             lex();
 
             //Parantheses handler
-            if (nextToken == OPEN_PAREN)
+            if(nextToken == OPEN_PAREN)
             {
+                parenCounter++;
                 lex();
                 expr();
+                
                 if(nextToken == CLOSE_PAREN) {
+                    parenCounter--;
                     lex();
                 }
-                
+                if(parenCounter != 0) {
+                    error();
+                }
                 //curl handler
-                if(nextToken == OPEN_CURL) 
-                {
-                lex();
-                while (nextToken != CLOSE_CURL)
-                    {
+                if(nextToken == OPEN_CURL) {
+                    int counter = 0;
+                    while(nextToken != CLOSE_CURL) {
+                        counter++;
                         lex();
                         expr();
-                        if(nextToken == CLOSE_CURL) {
-                            lex();
-                        }     
+                        if(counter == 50 || nextToken == KEY_ELSE) {
+                            error();
+                        }
                     }
-                break;
                 }
-            }
-
-            //else statement handler
-            else if(nextToken == KEY_ELSE) {
-                //implement else statement later
             }
             else {
                 error();
             }
+            break;
+        case KEY_ELSE:
+                lex();
+                    if(nextToken == OPEN_CURL) {
+                        int counter = 0;
+
+                        //continue lexing until close curl
+                        while(nextToken != CLOSE_CURL) {
+                            counter++;
+                            lex();
+                            expr();
+                            if(counter == 50) {
+                                error();
+                            }
+                        }
+                    }
+                    else {
+                        error();
+                    }
             break;
         case KEY_OUT:
             lex();
@@ -146,11 +247,15 @@ void factor()
                 expr();
                 if(nextToken == CLOSE_PAREN) {
                     lex();
+                    if(nextToken != SEMICOLON) {
+                        error();
+                    }
                 }
             } else {
                 error();
             }
             break;
+
         case KEY_IN:
             lex();
 
@@ -160,10 +265,18 @@ void factor()
                 expr();
                 if(nextToken == CLOSE_PAREN) {
                     lex();
+                    if(nextToken != SEMICOLON) {
+                        error();
+                    }
                 }
             } else {
                 error();
             }
+            break;
+        case OPEN_PAREN:
+            lex();
+            expr();
+
             break;
         default:
             break;
@@ -180,6 +293,15 @@ void factor()
         else if(nextToken == SEMICOLON) {
             
         }
+        else if(nextToken == CLOSE_CURL) {
+            
+        }
+        // else if(nextToken == KEY_ELSE) {
+            
+        // }
+        // else if(nextToken == CLOSE_PAREN) {
+             
+        // }
         /* End of if (nextToken == ... */
         /* It was not an id, an integer literal, or a left parenthesis */
         else
@@ -187,6 +309,7 @@ void factor()
             error();
         }
     } /* End of else */
+    cout << "Exit <factor>" << endl;
 
 } /* End of function factor */
 
@@ -222,15 +345,15 @@ static void getNonBlank()
     while (isspace(nextChar))
     {   
         if (nextChar == '\n')
-        {
-            
-            if(!((getPreviousChar == ';' || getPreviousChar == '{' || getPreviousChar == '}' || getPreviousChar == '\n')) && lexeme != "EOF") {
-                getPreviousChar = '\n';
-                error();
-            }
+        {   
+            cout << "The lexeme after '/n': " << lexeme << endl;
+            // if(!((getPreviousChar == ';' || getPreviousChar == '{' || getPreviousChar == '}' || getPreviousChar == '\n') || 
+            // (getPreviousChar == ')' && nextToken != OPEN_CURL) || (nextToken == KEY_ELSE))  && lexeme != "EOF") {
+            //     error();
+            // }
             lineNumber++;
         }
-        getChar();
+    getChar();
     }
 }
 
@@ -497,6 +620,10 @@ static int lookup(char ch)
             nextToken = UNKNOWN;
         }
         break;
+    case '%':
+        addChar();
+        nextToken = MOD_OP;
+        break;
     default:
         addChar();
         nextToken = UNKNOWN;
@@ -566,12 +693,16 @@ int lex()
 
     /* EOF */
     case EOF:
-        previousToken = nextToken;
-        nextToken = EOF;
-        lexeme[0] = 'E';
-        lexeme[1] = 'O';
-        lexeme[2] = 'F';
-        lexeme[3] = 0;
+        if(nextToken == CLOSE_CURL || nextToken == SEMICOLON) {
+            previousToken = nextToken;
+            nextToken = EOF;
+            lexeme[0] = 'E';
+            lexeme[1] = 'O';
+            lexeme[2] = 'F';
+            lexeme[3] = 0;
+        } else {
+            error();
+        }
         break;
 
     } /* End of switch */
@@ -603,12 +734,11 @@ int main(int argc, char *argv[])
         getChar();
         do
         {
+            cout << lexeme << endl;
             lex();
+            cout << "Calling expr" << endl;
             expr();
         } while (nextToken != EOF);
-        if(!(previousToken ==  SEMICOLON || previousToken == CLOSE_CURL)) {
-            error();
-        }
     }
     return 0;
 }
