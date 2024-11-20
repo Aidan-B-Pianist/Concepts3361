@@ -1,13 +1,13 @@
-f = 15;
-i = 10;
+ifsum=1;
+counter= 1;
 
-input(n);
+input(inputnum);
 
-if (n = 5) {
-	i = i + f;
-} else {
-	i = i + f;
+if (ifsum != counter)
+{
+  counter = counter + 1;
+  ifsum = ifsum + inputnum;
 }
 
-
-output(n);
+outputaverage=ifsum/counter;
+output(outputaverage);
