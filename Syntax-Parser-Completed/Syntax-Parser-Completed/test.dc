@@ -1,0 +1,13 @@
+ifsum=1;
+counter= 1;
+
+input(inputnum);
+
+if (ifsum != counter)
+{
+  counter = counter + 1;
+  ifsum = ifsum + inputnum;
+}
+
+outputaverage=ifsum/counter;
+output(outputaverage);
