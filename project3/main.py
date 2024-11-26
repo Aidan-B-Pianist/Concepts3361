@@ -1,11 +1,14 @@
 import sys
+import numpy as np
 import time
 
-n = len(sys.argv)
+if(sys.argv[1] != '-i' or sys.argv[3] != '-o'):
+    print("Example calling: main.py -i input.dat -o output.dat")
+    sys.exit(1)
 
-cmdline = sys.argv[1]
-outputFile = sys.argv[2]
-
+#Command line arguments
+cmdline = sys.argv[2]
+outputFile = sys.argv[4]
 inputFile = open(cmdline, "r")
 
 #Do these in batches
@@ -30,27 +33,61 @@ def StringToIntArray(file):
     matrix = [[
         checkCase(char) for char in line
     ] for line in text.split('\n')]
-    #Do the calculation
-    #Mathing()
+
     return matrix
 
-#do the math 
-def Mathing():
+def getAdjectCells(matrix, x_cord, y_cord):
+    row_len = len(matrix)
+    col_len = len(matrix[0])
+    outerloop_1 = x_cord - 1
+    outerloop_2 = x_cord + 2
+    innerloop_1 = y_cord - 1
+    innerloop_2 = y_cord + 2
+    result = []
+
+    #check the first level case
+    if x_cord - 1 < 0:
+        outerloop_1 = 0
+
+    #check the last level case
+    if x_cord + 2 > row_len:
+        outerloop_2 = row_len
+
+    #check the first level case
+    if y_cord - 1 < 0:
+        innerloop_1 = 0
+
+    #check the last level case
+    if y_cord + 2 > col_len:
+        innerloop_2 = col_len
+
+
+    for i in range(outerloop_1, outerloop_2, 1):
+        for j in range(innerloop_1, innerloop_2, 1):
+            # print(f"i: {i} j: {j}\n")
+            # print(f"x: {x_cord} y: {y_cord}\n")
+            if (i != x_cord or j != y_cord):
+                result.append(matrix[i][j])
+
+    return result
+    
+
+
+#Do the transforming
+def Compute(matrix):
+    for i in range(len(matrix)):
+        for j in range(len(matrix[0])):
+            #print(i, j)
+            neighbors = getAdjectCells(matrix, i, j)
+            print(neighbors)
+            #matrix[i][j] = Rules(matrix[i][j], neighbors)
+            print(matrix[i][j])
+            
+        sys.exit(1)    
+
+def Rules(value, neighbors):
     return 0
 
-
-
-
-
-
-
-
-
-
-
-
-result = StringToIntArray(inputFile)
-print(result)
 
 #Convert String to Integer
 def IntToStringArray(matrix):
@@ -72,4 +109,18 @@ def IntToStringArray(matrix):
     for line in lines:
         fileOutput.write(line)
 
-IntToStringArray(result)
+
+
+
+def main():
+    result = StringToIntArray(inputFile)
+    matrix = Compute(result)
+    print(matrix)   
+
+    IntToStringArray(matrix)
+    
+
+
+
+
+main()
