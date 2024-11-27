@@ -1,20 +1,24 @@
 import sys
-import numpy as np
-import time
+import math
+import argparse
 
-if(sys.argv[1] != '-i' or sys.argv[3] != '-o'):
-    print("Example calling: main.py -i input.dat -o output.dat")
-    sys.exit(1)
+parser = argparse.ArgumentParser(description="Project 3 Multiprocessor")
+
+parser.add_argument('-i', '--input', required=True)
+parser.add_argument('-o', '--output', required=True)
+
+args = parser.parse_args()
 
 #Command line arguments
-cmdline = sys.argv[2]
-outputFile = sys.argv[4]
+cmdline = args.input
+outputFile = args.output
 inputFile = open(cmdline, "r")
 
 #Do these in batches
 lowerBound = 0
 upperBound = 3
 
+listofPrimeNumbers = [2, 3, 5, 7, 11, 13]
 
 #Convert string file into 2d array with integers
 def StringToIntArray(file):
@@ -37,7 +41,7 @@ def StringToIntArray(file):
     return matrix
 
 def getAdjectCells(matrix, x_cord, y_cord):
-    row_len = len(matrix)
+    row_len = len(matrix) - 1
     col_len = len(matrix[0])
     outerloop_1 = x_cord - 1
     outerloop_2 = x_cord + 2
@@ -61,12 +65,13 @@ def getAdjectCells(matrix, x_cord, y_cord):
     if y_cord + 2 > col_len:
         innerloop_2 = col_len
 
-
     for i in range(outerloop_1, outerloop_2, 1):
         for j in range(innerloop_1, innerloop_2, 1):
             # print(f"i: {i} j: {j}\n")
             # print(f"x: {x_cord} y: {y_cord}\n")
             if (i != x_cord or j != y_cord):
+                # print(f"i: {i} the j-index is: {j}\n")
+                # print(matrix[i][j])
                 result.append(matrix[i][j])
 
     return result
@@ -75,18 +80,65 @@ def getAdjectCells(matrix, x_cord, y_cord):
 
 #Do the transforming
 def Compute(matrix):
-    for i in range(len(matrix)):
+    for i in range(len(matrix) - 1):
         for j in range(len(matrix[0])):
-            #print(i, j)
             neighbors = getAdjectCells(matrix, i, j)
-            print(neighbors)
-            #matrix[i][j] = Rules(matrix[i][j], neighbors)
-            print(matrix[i][j])
-            
-        sys.exit(1)    
+            # print(matrix[i][j])
+            # print(neighbors)
+
+            matrix[i][j] = Rules(matrix[i][j], neighbors)
+            #write it to the file here
+
+
+    return matrix
+
+
+def powerOfTwo(value):
+    return value > 0 and math.log2(value).is_integer
+
+def primeNumber(value):
+    return value in listofPrimeNumbers
+
+def absolutePrimeNumber(value):
+    return abs(primeNumber(value))
+
+def powerOfTwoAbsolute(value):
+    return abs(value > 0 and math.log2(value).is_integer)
 
 def Rules(value, neighbors):
-    return 0
+    total = sum(neighbors)
+    if value == 2:
+        if powerOfTwo(total):
+            return 0
+        elif total < 10:
+            return 1
+        return 2
+    elif value == 1:
+        if total < 0:
+            return 0
+        elif total > 8:
+            return 2
+        return 1
+    elif value == 0:
+        if primeNumber(total):
+            return 1
+        elif absolutePrimeNumber(total):
+            return -1
+        return 0
+    elif value == -1:
+        if total >= 1:
+            return 0
+        elif total < -8:
+            return -2
+        return -1
+    elif value == -2:
+        if powerOfTwoAbsolute(value):
+            return 0
+        elif value > -10:
+            return -1
+        return -2
+
+    
 
 
 #Convert String to Integer
@@ -115,12 +167,9 @@ def IntToStringArray(matrix):
 def main():
     result = StringToIntArray(inputFile)
     matrix = Compute(result)
-    print(matrix)   
 
     IntToStringArray(matrix)
     
-
-
 
 
 main()
