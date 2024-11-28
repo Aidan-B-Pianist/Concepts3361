@@ -1,6 +1,8 @@
-import math
 import argparse
 import os.path
+
+#Print out R number
+print("Project :: R11837228")
 
 #Parse arguments for input and output
 parser = argparse.ArgumentParser(description="Project 3 Multiprocessor")
@@ -14,10 +16,10 @@ args = parser.parse_args()
 if not os.path.exists(args.input):
     parser.error("The file %s does not exist" % args.input)
 
-if not os.path.exists(os.path.join(args.output)):
-    parser.error("The directories in the file path does not exist")
-
-if args.processor is not None and args.processor <= 0:
+if args.processor is None:
+    #automatically set to 1
+    args.processor = 1
+elif args.processor > 0:
     parser.error("You must put a value greater than 0")
 
 #Command line arguments
@@ -32,6 +34,9 @@ upperBound = 3
 
 #list of prime numbers
 listofPrimeNumbers = [2, 3, 5, 7, 11, 13]
+
+#list of power numbers
+listofPowerNumbers = [1, 2, 4, 8, 16]
 
 #Convert string file into 2d array with integers
 def StringToIntArray(file):
@@ -54,7 +59,7 @@ def StringToIntArray(file):
     return matrix
 
 def getAdjectCells(matrix, x_cord, y_cord):
-    row_len = len(matrix) - 1
+    row_len = len(matrix)
     col_len = len(matrix[0])
     outerloop_1 = x_cord - 1
     outerloop_2 = x_cord + 2
@@ -93,14 +98,15 @@ def getAdjectCells(matrix, x_cord, y_cord):
 
 #Do the transforming
 def Compute(matrix):
+    finalMatrix = [['A' for num in range(len(matrix[0]))] for num in range(len(matrix))]
     fileOutput = open(outputFile, "w")
-    for i in range(len(matrix) - 1):
+    for i in range(len(matrix)):
         for j in range(len(matrix[0])):
             neighbors = getAdjectCells(matrix, i, j)
             # print(matrix[i][j])
             # print(neighbors)
             #Do the necessary calculations established in the rulebook
-            matrix[i][j] = Rules(matrix[i][j], neighbors)
+            finalMatrix[i][j] = Rules(matrix[i][j], neighbors)
 
             #write it to the file here
             def checkCase(input):
@@ -114,25 +120,27 @@ def Compute(matrix):
                     return 'x'
                 elif input == -2:
                     return 'X'
-            lines = [(checkCase(matrix[i][j]))]
+            lines = [checkCase(finalMatrix[i][j])]
             output = ''.join(lines)
             fileOutput.write(output)
             
-        linebreaker = '\n'.join('\n')
-        fileOutput.write(linebreaker)
+        if i != len(matrix) - 1: 
+            linebreaker = ''.join('\n')
+            fileOutput.write(linebreaker)
+    
+    return finalMatrix
 
-
-    return matrix
 
 
 def powerOfTwo(value):
-    return value > 0 and math.log2(value).is_integer
+    return value in listofPowerNumbers
 
 def primeNumber(value):
     return value in listofPrimeNumbers
 
 def Rules(value, neighbors):
     total = sum(neighbors)
+    #print(neighbors, total)
     if value == 2:
         if powerOfTwo(total):
             return 0
@@ -148,7 +156,7 @@ def Rules(value, neighbors):
     elif value == 0:
         if primeNumber(total):
             return 1
-        elif abs(primeNumber(total)):
+        elif primeNumber(abs(total)):
             return -1
         return 0
     elif value == -1:
@@ -158,9 +166,9 @@ def Rules(value, neighbors):
             return -2
         return -1
     elif value == -2:
-        if abs(powerOfTwo(total)):
+        if powerOfTwo(abs(total)):
             return 0
-        elif value > -10:
+        elif total > -10:
             return -1
         return -2
     
@@ -170,7 +178,10 @@ def Rules(value, neighbors):
 
 def main():
     result = StringToIntArray(inputFile)
-    Compute(result)
+    for i in range(0, 100, 1):
+        #print(i)
+        result = Compute(result)
+        
 
 
 
