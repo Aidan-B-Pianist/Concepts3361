@@ -51,7 +51,7 @@ def StringToIntArray(file):
             return -2
     matrix = [[
         checkCase(char) for char in line
-    ] for line in text.split('\n')]
+    ] for line in text.split('\n') if line.strip()]
 
     return matrix
 
