@@ -56,50 +56,35 @@ def StringToIntArray(file):
     return matrix
 
 
-def getAdjectCells(matrix, x_cord, y_cord):
-    row_len = len(matrix)
-    col_len = len(matrix[0])
-    outerloop_1 = x_cord - 1
-    outerloop_2 = x_cord + 2
-    innerloop_1 = y_cord - 1
-    innerloop_2 = y_cord + 2
-    result = []
-    #matrix[3][0]
-    #check the first level case
-    if x_cord - 1 < 0:
-        outerloop_1 = 0
+def getAdjenctCells(matrix, i , j):
 
-    #check the last level case
-    if x_cord + 2 > row_len:
-        outerloop_2 = row_len
+    neighbors = []
 
-    #check the first level case
-    if y_cord - 1 < 0:
-        innerloop_1 = 0
+    rowLimit = len(matrix)
+    columnLimit = len(matrix[i])
 
-    #check the last level case
-    if y_cord + 2 > col_len:
-        innerloop_2 = col_len
+    def checkNeighbor(x, y):
+        #check boundaries to see if neighbor is legit
+        return (0 <= x < rowLimit) and (0 <= y < columnLimit) and ((x, y) != (i, j))
+    
+    #iterate through the 2d matrix using conditional max and min statements to 
+    #get each neighbor up down and diagonally
+    for x in range (max(0, i-1), min(rowLimit, i+2)):
+        for y in range (max(0, j-1), min(columnLimit, j+2)):
+            if checkNeighbor(x, y):
+                neighbors.append(matrix[x][y])
 
-    for i in range(outerloop_1, outerloop_2, 1):
-        for j in range(innerloop_1, innerloop_2, 1):
-            # print(f"i: {i} j: {j}\n")
-            # print(f"x: {x_cord} y: {y_cord}\n")
-            if (i != x_cord or j != y_cord):
-                # print(f"i: {i} the j-index is: {j}\n")
-                # print(matrix[i][j])
-                result.append(matrix[i][j])
-
-    return result
+    return neighbors
 
 #Do the transforming
 def Compute(iterativeTuple):
     #create tuple from iterable
-    i, matrix = iterativeTuple
+    i, matrix = tuple(iterativeTuple)
+    #print(f"Row: {i}, matrix: {matrix}\n")
     result = []
     #do row transforms by iterating j, and let pool workers do the rest
-    for j in range(len(matrix[0])):
-        neighbors = getAdjectCells(matrix, i, j)
+    for j in range(len(matrix[i])):
+        neighbors = getAdjenctCells(matrix, i, j)
         result.append(Rules(matrix[i][j], neighbors))
     return result
 
@@ -110,8 +95,8 @@ def primeNumber(value):
     return value in listofPrimeNumbers
 
 def Rules(value, neighbors):
+    #print(neighbors)
     total = sum(neighbors)
-    #print(neighbors, total)
     if value == 2:
         if powerOfTwo(total):
             return 0
@@ -172,7 +157,7 @@ def main():
 
     #change the file from strings to numbers
     result = StringToIntArray(inputFile)
-
+    #print(f"the result is {result}")
     for i in range(100):
 
         with Pool(processes=args.processor) as pool:
