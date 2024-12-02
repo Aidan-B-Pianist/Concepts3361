@@ -1,3 +1,15 @@
+"""
+=============================================================================
+Title : Aidan_Burchett_R11837228_final_project.py
+Description : This is a python script that uses Pool multiprocessing when performing matrice calculations
+Author : Aidan Burchett R11837228
+Date : 12/2/2024
+Version : 1.0
+Usage : python3 Aidan_Burchett_R11837228_final_project.py -i input.dat -o output.dat -p 2
+Notes : 
+Python Version: 3.11.9
+=============================================================================
+"""
 import argparse
 import os.path
 from multiprocessing import *
@@ -55,10 +67,10 @@ def StringToIntArray(file):
 
     return matrix
 
-
+#Get the adjacent cells of the matrix
 def getAdjenctCells(matrix, i , j):
 
-    neighbors = []
+    neighborsSum = 0
 
     rowLimit = len(matrix)
     columnLimit = len(matrix[i])
@@ -72,9 +84,9 @@ def getAdjenctCells(matrix, i , j):
     for x in range (max(0, i-1), min(rowLimit, i+2)):
         for y in range (max(0, j-1), min(columnLimit, j+2)):
             if checkNeighbor(x, y):
-                neighbors.append(matrix[x][y])
+                neighborsSum += matrix[x][y]
 
-    return neighbors
+    return neighborsSum
 
 #Do the transforming
 def Compute(iterativeTuple):
@@ -94,9 +106,9 @@ def powerOfTwo(value):
 def primeNumber(value):
     return value in listofPrimeNumbers
 
-def Rules(value, neighbors):
-    #print(neighbors)
-    total = sum(neighbors)
+#Go through the rules using very poor if else statements
+# (Using dictionaries would have been better but I didn't think that at the beginning)
+def Rules(value, total):
     if value == 2:
         if powerOfTwo(total):
             return 0
@@ -128,7 +140,7 @@ def Rules(value, neighbors):
             return -1
         return -2
     
-
+#Convert the integer back to String
 def IntToStringArray(matrix):
     with open(str(outputFile), "w") as fileOutput:
         def checkCase(input):
@@ -157,9 +169,9 @@ def main():
 
     #change the file from strings to numbers
     result = StringToIntArray(inputFile)
-    #print(f"the result is {result}")
     for i in range(100):
 
+        #I love pool, it does all the hardwork for me
         with Pool(processes=args.processor) as pool:
             result = pool.map(Compute, [(i, result) for i in range(len(result))])
 
